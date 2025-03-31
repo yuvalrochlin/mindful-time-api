@@ -12,27 +12,32 @@ app.post('/ask-ai', async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-      model: 'gpt-4',
-      messages: [
-        { role: 'system', content: 'You are a supportive and thoughtful weekly coach.' },
-        { role: 'user', content: userMessage }
-      ]
-    }, {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4',
+        messages: [
+          { role: 'system', content: 'אתה עוזר אישי שמארגן משימות לפי סדר עדיפויות ולו״ז שבועי. תחזיר לו״ז שבועי כולל המלצות לזמנים בהתאם למשימות שנמסרו' },
+          { role: 'user', content: userMessage }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
 
-    res.json(response.data);
+    res.json({ reply: response.data.choices[0].message.content });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error('Error from OpenAI:', error.message);
+    res.status(500).json({ error: 'Failed to get response from AI.' });
   }
 });
 
-// 🟢 פתיחת השרת עם פורט דינמי ל-Render:
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
